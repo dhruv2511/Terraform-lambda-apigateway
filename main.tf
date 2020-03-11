@@ -56,6 +56,30 @@ module "lambda_post" {
   role        = aws_iam_role.iam_role_for_lambda.arn
 }
 
+module "lambda_monitoring_get" {
+  source      = "./lambda"
+  description = "Get Handler for the api"
+  filename    = data.archive_file.api_lambda.output_path
+  source_code = data.archive_file.api_lambda.output_base64sha256
+  name        = "hello_lambda"
+  handler     = "get_handler"
+  runtime     = var.runtime
+  role        = aws_iam_role.iam_role_for_lambda.arn
+}
+
+# This is a second lambda function that will run the code
+# `hello_lambda.post_handler`
+module "lambda_monitoring_post" {
+  source      = "./lambda"
+  description = "Post handler for the api"
+  filename    = data.archive_file.api_lambda.output_path
+  source_code = data.archive_file.api_lambda.output_base64sha256
+  name        = "hello_lambda"
+  handler     = "post_handler"
+  runtime     = var.runtime
+  role        = aws_iam_role.iam_role_for_lambda.arn
+}
+
 # Now, we need an API to expose those functions publicly
 resource "aws_api_gateway_rest_api" "portal_api" {
   name = "Portal API"
@@ -111,7 +135,7 @@ module "monitoring_get" {
   resource_id = aws_api_gateway_resource.monitoring_api_res.id
   method      = "GET"
   path        = aws_api_gateway_resource.monitoring_api_res.path
-  lambda      = module.lambda.name
+  lambda      = module.lambda_monitoring_get.name
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
 }
@@ -123,7 +147,7 @@ module "monitoring_post" {
   resource_id = aws_api_gateway_resource.monitoring_api_res.id
   method      = "POST"
   path        = aws_api_gateway_resource.monitoring_api_res.path
-  lambda      = module.lambda.name
+  lambda      = module.lambda_monitoring_post.name
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
 }
