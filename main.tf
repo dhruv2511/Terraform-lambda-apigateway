@@ -62,7 +62,7 @@ module "lambda_monitoring_get" {
   filename    = data.archive_file.api_lambda.output_path
   source_code = data.archive_file.api_lambda.output_base64sha256
   name        = "hello_lambda"
-  handler     = "get_handler"
+  handler     = "monitoring_get_handler"
   runtime     = var.runtime
   role        = aws_iam_role.iam_role_for_lambda.arn
 }
@@ -75,7 +75,7 @@ module "lambda_monitoring_post" {
   filename    = data.archive_file.api_lambda.output_path
   source_code = data.archive_file.api_lambda.output_base64sha256
   name        = "hello_lambda"
-  handler     = "post_handler"
+  handler     = "monitoring_post_handler"
   runtime     = var.runtime
   role        = aws_iam_role.iam_role_for_lambda.arn
 }
