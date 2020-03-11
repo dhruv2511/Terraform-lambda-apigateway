@@ -70,9 +70,9 @@ resource "aws_api_gateway_resource" "data_api_res" {
 }
 
 resource "aws_api_gateway_resource" "monitoring_api_res" {
-  parent_id   = aws_api_gateway_rest_api.portal_api.id
+  parent_id   = aws_api_gateway_rest_api.portal_api.root_resource_id
   path_part   = "monitoring"
-  rest_api_id = aws_api_gateway_rest_api.portal_api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.portal_api.id
 }
 
 # Until now, the resource created could not respond to anything. We must set up
@@ -123,7 +123,7 @@ module "monitoring_post" {
   resource_id = aws_api_gateway_resource.monitoring_api_res.id
   method      = "POST"
   path        = aws_api_gateway_resource.monitoring_api_res.path
-  lambda      = module.lambda_post.name
+  lambda      = module.lambda.name
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
 }
