@@ -34,7 +34,9 @@ data "archive_file" "api_lambda" {
 
 module "lambda" {
   source  = "./lambda"
-  filename = data.archive_file.api_lambda.output_base64sha256
+  description = "Get Handler for the api"
+  filename = data.archive_file.api_lambda.output_path
+  source_code = data.archive_file.api_lambda.output_base64sha256
   name    = "hello_lambda"
   handler = "get_handler"
   runtime = var.runtime
@@ -45,7 +47,9 @@ module "lambda" {
 # `hello_lambda.post_handler`
 module "lambda_post" {
   source  = "./lambda"
-  filename = data.archive_file.api_lambda.output_base64sha256
+  description = "Post handler for the api"
+  filename = data.archive_file.api_lambda.output_path
+  source_code = data.archive_file.api_lambda.output_base64sha256
   name    = "hello_lambda"
   handler = "post_handler"
   runtime = var.runtime

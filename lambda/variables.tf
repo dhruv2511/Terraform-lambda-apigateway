@@ -15,3 +15,15 @@ variable "handler" {
 variable "role" {
   description = "IAM role attached to the Lambda Function (ARN)"
 }
+
+variable "description" {
+  description = "Description for the lambda"
+}
+
+variable "filename" {
+  description = "File name for where the lambda is located"
+}
+
+variable "source_code" {
+  description = "Source Code hash to be used for the lambda"
+}
