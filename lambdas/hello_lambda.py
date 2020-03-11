@@ -1,4 +1,4 @@
-def handler(event, context):
+def get_handler(event, context):
     return { "message": "Hello, World!" }
 
 def post_handler(event, context):

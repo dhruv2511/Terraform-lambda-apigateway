@@ -1,5 +1,5 @@
 provider "aws" {
-  region     = "${var.aws_region}"
+  region     = var.aws_region
 }
 
 data "aws_caller_identity" "current" { }
@@ -26,21 +26,30 @@ EOF
 }
 
 # Here is a first lambda function that will run the code `hello_lambda.handler`
+data "archive_file" "api_lambda" {
+  source_dir = "${path.module}/lambdas"
+  output_path = "${path.module}/lambdas.zip"
+  type = "zip"
+}
+
 module "lambda" {
   source  = "./lambda"
+  filename = data.archive_file.api_lambda.output_base64sha256
   name    = "hello_lambda"
-  runtime = "python2.7"
-  role    = "${aws_iam_role.iam_role_for_lambda.arn}"
+  handler = "get_handler"
+  runtime = var.runtime
+  role    = aws_iam_role.iam_role_for_lambda.arn
 }
 
 # This is a second lambda function that will run the code
 # `hello_lambda.post_handler`
 module "lambda_post" {
   source  = "./lambda"
+  filename = data.archive_file.api_lambda.output_base64sha256
   name    = "hello_lambda"
   handler = "post_handler"
-  runtime = "python2.7"
-  role    = "${aws_iam_role.iam_role_for_lambda.arn}"
+  runtime = var.runtime
+  role    = aws_iam_role.iam_role_for_lambda.arn
 }
 
 # Now, we need an API to expose those functions publicly
@@ -51,8 +60,8 @@ resource "aws_api_gateway_rest_api" "hello_api" {
 # The API requires at least one "endpoint", or "resource" in AWS terminology.
 # The endpoint created here is: /hello
 resource "aws_api_gateway_resource" "hello_api_res_hello" {
-  rest_api_id = "${aws_api_gateway_rest_api.hello_api.id}"
-  parent_id   = "${aws_api_gateway_rest_api.hello_api.root_resource_id}"
+  rest_api_id = aws_api_gateway_rest_api.hello_api.id
+  parent_id   = aws_api_gateway_rest_api.hello_api.root_resource_id
   path_part   = "hello"
 }
 
@@ -61,30 +70,30 @@ resource "aws_api_gateway_resource" "hello_api_res_hello" {
 # This is the code for method GET /hello, that will talk to the first lambda
 module "hello_get" {
   source      = "./api_method"
-  rest_api_id = "${aws_api_gateway_rest_api.hello_api.id}"
-  resource_id = "${aws_api_gateway_resource.hello_api_res_hello.id}"
+  rest_api_id = aws_api_gateway_rest_api.hello_api.id
+  resource_id = aws_api_gateway_resource.hello_api_res_hello.id
   method      = "GET"
-  path        = "${aws_api_gateway_resource.hello_api_res_hello.path}"
-  lambda      = "${module.lambda.name}"
-  region      = "${var.aws_region}"
-  account_id  = "${data.aws_caller_identity.current.account_id}"
+  path        = aws_api_gateway_resource.hello_api_res_hello.path
+  lambda      = module.lambda.name
+  region      = var.aws_region
+  account_id  = data.aws_caller_identity.current.account_id
 }
 
 # This is the code for method POST /hello, that will talk to the second lambda
 module "hello_post" {
   source      = "./api_method"
-  rest_api_id = "${aws_api_gateway_rest_api.hello_api.id}"
-  resource_id = "${aws_api_gateway_resource.hello_api_res_hello.id}"
+  rest_api_id = aws_api_gateway_rest_api.hello_api.id
+  resource_id = aws_api_gateway_resource.hello_api_res_hello.id
   method      = "POST"
-  path        = "${aws_api_gateway_resource.hello_api_res_hello.path}"
-  lambda      = "${module.lambda_post.name}"
-  region      = "${var.aws_region}"
-  account_id  = "${data.aws_caller_identity.current.account_id}"
+  path        = aws_api_gateway_resource.hello_api_res_hello.path
+  lambda      = module.lambda_post.name
+  region      = var.aws_region
+  account_id  = data.aws_caller_identity.current.account_id
 }
 
 # We can deploy the API now! (i.e. make it publicly available)
 resource "aws_api_gateway_deployment" "hello_api_deployment" {
-  rest_api_id = "${aws_api_gateway_rest_api.hello_api.id}"
+  rest_api_id = aws_api_gateway_rest_api.hello_api.id
   stage_name  = "production"
   description = "Deploy methods: ${module.hello_get.http_method} ${module.hello_post.http_method}"
 }
