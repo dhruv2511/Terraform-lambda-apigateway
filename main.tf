@@ -123,7 +123,7 @@ module "monitoring_post" {
   resource_id = aws_api_gateway_resource.monitoring_api_res.id
   method      = "POST"
   path        = aws_api_gateway_resource.monitoring_api_res.path
-  lambda      = module.lambda_post.name
+  lambda      = module.lambda.name
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
 }
