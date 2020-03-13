@@ -32,11 +32,12 @@ data "archive_file" "zipit" {
 }
 
 resource "aws_lambda_function" "monitoring_lambda" {
-  function_name    = data.archive_file.zipit.output_path
+  function_name    = "monitoring_lambda"
   handler          = "handler"
   role             = "${aws_iam_role.iam_role_for_lambda.arn}"
   runtime          = "python3.7"
   source_code_hash = data.archive_file.zipit.output_base64sha256
+  filename         = data.archive_file.zipit.output_path
 
 }
 //# Now, we need an API to expose those functions publicly
