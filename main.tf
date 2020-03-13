@@ -25,62 +25,17 @@ resource "aws_iam_role" "iam_role_for_lambda" {
 EOF
 }
 
-# Here is a first lambda function that will run the code `hello_lambda.handler`
-data "archive_file" "api_lambda" {
-  source_dir  = "${path.module}/lambdas"
-  output_path = "${path.module}/lambdas.zip"
+data "archive_file" "zipit" {
   type        = "zip"
+  source_dir  = "${path.module}/lambda"
+  output_path = "${path.module}/lambda/monitoring_lambda.zip"
 }
 
-module "lambda" {
-  source      = "./lambda"
-  description = "Get Handler for the api"
-  filename    = data.archive_file.api_lambda.output_path
-  source_code = data.archive_file.api_lambda.output_base64sha256
-  name        = "hello_lambda"
-  handler     = "get_handler"
-  runtime     = var.runtime
-  role        = aws_iam_role.iam_role_for_lambda.arn
-  env_variable = {
-    tfe_api = var.access_token
-  }
-}
-
-# This is a second lambda function that will run the code
-# `hello_lambda.post_handler`
-module "lambda_post" {
-  source      = "./lambda"
-  description = "Post handler for the api"
-  filename    = data.archive_file.api_lambda.output_path
-  source_code = data.archive_file.api_lambda.output_base64sha256
-  name        = "hello_lambda"
-  handler     = "post_handler"
-  runtime     = var.runtime
-  role        = aws_iam_role.iam_role_for_lambda.arn
-}
-
-module "lambda_monitoring_get" {
-  source      = "./lambda"
-  description = "Get Handler for the api"
-  filename    = data.archive_file.api_lambda.output_path
-  source_code = data.archive_file.api_lambda.output_base64sha256
-  name        = "hello_lambda"
-  handler     = "monitoring_get_handler"
-  runtime     = var.runtime
-  role        = aws_iam_role.iam_role_for_lambda.arn
-}
-
-# This is a second lambda function that will run the code
-# `hello_lambda.post_handler`
-module "lambda_monitoring_post" {
-  source      = "./lambda"
-  description = "Post handler for the api"
-  filename    = data.archive_file.api_lambda.output_path
-  source_code = data.archive_file.api_lambda.output_base64sha256
-  name        = "hello_lambda"
-  handler     = "monitoring_post_handler"
-  runtime     = var.runtime
-  role        = aws_iam_role.iam_role_for_lambda.arn
+resource "aws_lambda_layer_version" "avm-lambda-layer" {
+  filename            = "${path.module}/layers/monitoring_lambda.zip"
+  layer_name          = "avm-common-functions-layer"
+  compatible_runtimes = ["python3.7"]
+  source_code_hash    = data.archive_file.zipit.output_base64sha256
 }
 
 # Now, we need an API to expose those functions publicly
@@ -111,7 +66,7 @@ module "data_get" {
   resource_id = aws_api_gateway_resource.data_api_res.id
   method      = "GET"
   path        = aws_api_gateway_resource.data_api_res.path
-  lambda      = module.lambda.name
+  lambda      = ""
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
 }
@@ -123,7 +78,7 @@ module "data_post" {
   resource_id = aws_api_gateway_resource.data_api_res.id
   method      = "POST"
   path        = aws_api_gateway_resource.data_api_res.path
-  lambda      = module.lambda_post.name
+  lambda      = ""
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
 }
@@ -138,7 +93,7 @@ module "monitoring_get" {
   resource_id = aws_api_gateway_resource.monitoring_api_res.id
   method      = "GET"
   path        = aws_api_gateway_resource.monitoring_api_res.path
-  lambda      = module.lambda_monitoring_get.name
+  lambda      = ""
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
 }
@@ -150,7 +105,7 @@ module "monitoring_post" {
   resource_id = aws_api_gateway_resource.monitoring_api_res.id
   method      = "POST"
   path        = aws_api_gateway_resource.monitoring_api_res.path
-  lambda      = module.lambda_monitoring_post.name
+  lambda      = ""
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
 }
