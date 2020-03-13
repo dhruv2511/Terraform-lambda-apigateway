@@ -1,4 +1,4 @@
-import http.client
+import requests
 import json
 import os
 import logging
@@ -8,8 +8,8 @@ root_logger.setLevel("INFO")
 log = logging.getLogger(__name__)
 
 def get_handler(event, context):
-    conn = http.client.HTTPConnection("app.terraform.io/app/delta")
-    conn.request("GET", "/organisations")
+
+    request("GET", "/organisations")
     res = conn.getresponse()
     log.debug(res)
 

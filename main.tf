@@ -39,6 +39,11 @@ resource "aws_lambda_function" "monitoring_get_lambda" {
   source_code_hash = data.archive_file.zipit.output_base64sha256
   filename         = data.archive_file.zipit.output_path
 
+
+  provisioner "local-exec" {
+    command = "${path.module}/lambda/pip.sh"
+  }
+
 }
 
 
