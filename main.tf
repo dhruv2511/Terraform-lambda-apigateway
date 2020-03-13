@@ -32,8 +32,8 @@ data "archive_file" "zipit" {
 }
 
 resource "aws_lambda_layer_version" "avm-lambda-layer" {
-  filename            = "${path.module}/layers/monitoring_lambda.zip"
-  layer_name          = "avm-common-functions-layer"
+  filename            = "${path.module}/lambda/monitoring_lambda.zip"
+  layer_name          = "monitoring_lambda_layers"
   compatible_runtimes = ["python3.7"]
   source_code_hash    = data.archive_file.zipit.output_base64sha256
 }
