@@ -31,13 +31,14 @@ data "archive_file" "zipit" {
   output_path = "${path.module}/lambda/monitoring_lambda.zip"
 }
 
-resource "aws_lambda_layer_version" "avm-lambda-layer" {
-  filename            = "${path.module}/lambda/monitoring_lambda.zip"
-  layer_name          = "monitoring_lambda_layers"
-  compatible_runtimes = ["python3.7"]
-  source_code_hash    = data.archive_file.zipit.output_base64sha256
-}
+resource "aws_lambda_function" "monitoring_lambda" {
+  function_name    = data.archive_file.zipit.output_path
+  handler          = "handler"
+  role             = "${aws_iam_role.iam_role_for_lambda.arn}"
+  runtime          = "python3.7"
+  source_code_hash = data.archive_file.zipit.output_base64sha256
 
+}
 //# Now, we need an API to expose those functions publicly
 //resource "aws_api_gateway_rest_api" "portal_api" {
 //  name = "Portal API"
