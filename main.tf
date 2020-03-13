@@ -26,7 +26,7 @@ EOF
 }
 
 resource "null_resource" "lambda_preconditions" {
-  triggers {
+  triggers = {
     always_run = "${uuid()}"
   }
   provisioner "local-exec" {
