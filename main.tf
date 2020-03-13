@@ -61,6 +61,10 @@ resource "aws_lambda_function" "monitoring_post_lambda" {
       access_token = var.access_token
     }
   }
+
+  provisioner "local-exec" {
+    command = "${path.module}/pip.sh"
+  }
 }
 
 # Now, we need an API to expose those functions publicly
