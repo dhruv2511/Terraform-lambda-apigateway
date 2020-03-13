@@ -1,11 +1,20 @@
-from tfc_client import TFCClient
+import http.client
+import json
+import os
+import logging
 
-client = TFCClient(token="NCgHy9dppsNDHA.atlasv1.TJmyX37z2RdyfsjTvt9ReqeN67Xp9NDWeAYRmp66279K7yy0dcjX2MiLl8MeZ6RorOE")
+root_logger = logging.getLogger()
+root_logger.setLevel("INFO")
+log = logging.getLogger(__name__)
 
-org = client.get("organization", id="delta")
+def handler(event, context):
+    conn = http.client.HTTPConnection("app.terraform.io/app/delta")
+    conn.request("GET", "/organisations")
+    res = conn.getresponse()
+    log.debug(res)
 
-response = org.create("workspace", name="test_api_workspace")
-
-
-def handler():
-    return (response)
+    response = {
+        "statusCode": res.status,
+        "body": json.dumps(res.reason)
+    }
+    return response
