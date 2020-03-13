@@ -25,26 +25,6 @@ resource "aws_iam_role" "iam_role_for_lambda" {
 EOF
 }
 
-resource "null_resource" "lambda_preconditions" {
-  triggers = {
-    always_run = "${uuid()}"
-  }
-  provisioner "local-exec" {
-    command = "rm -rf ${path.module}/../../target_lambda"
-  }
-  provisioner "local-exec" {
-    command = "mkdir -p ${path.module}/../../target_lambda"
-  }
-  provisioner "local-exec" {
-    command = "pip3 install --target=${path.module}/../../target_lambda requests"
-  }
-  provisioner "local-exec" {
-    command = "cp -R ${path.module}/../../lambda_*.py ${path.module}/../../target_lambda/."
-  }
-  provisioner "local-exec" {
-    command = "cd ${path.module}/../../target_lambda && zip -r lambda.zip ."
-  }
-}
 
 
 data "archive_file" "zipit" {
@@ -60,7 +40,11 @@ resource "aws_lambda_function" "monitoring_get_lambda" {
   runtime          = "python3.7"
   source_code_hash = data.archive_file.zipit.output_base64sha256
   filename         = data.archive_file.zipit.output_path
-  depends_on       = [null_resource.lambda_preconditions]
+  environment {
+    variables = {
+      access_token = var.access_token
+    }
+  }
 
 }
 
@@ -72,7 +56,11 @@ resource "aws_lambda_function" "monitoring_post_lambda" {
   runtime          = "python3.7"
   source_code_hash = data.archive_file.zipit.output_base64sha256
   filename         = data.archive_file.zipit.output_path
-
+  environment {
+    variables = {
+      access_token = var.access_token
+    }
+  }
 }
 
 # Now, we need an API to expose those functions publicly

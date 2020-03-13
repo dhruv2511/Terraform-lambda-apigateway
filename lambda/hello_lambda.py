@@ -1,29 +1,29 @@
 import requests
 import json
 import os
-import logging
+import http.client
 
-root_logger = logging.getLogger()
-root_logger.setLevel("INFO")
-log = logging.getLogger(__name__)
+
+headers = {
+    'Authorization': f'Bearer ${os.environ["access_token"]}',
+    'Content-Type': 'application/vnd.api+json',
+}
+
+
+
 
 def get_handler(event, context):
-
-    request("GET", "/organisations")
-    res = conn.getresponse()
-    log.debug(res)
-
+    req_response = requests.get('https://app.terraform.io/api/v2/organizations', headers=headers)
     response = {
-        "statusCode": res.status,
-        "body": json.dumps(res.reason)
+        "statusCode": req_response.status_code,
+        "body": json.dumps(req_response.reason)
     }
     return response
 
 def post_handler(event, context):
-    conn = http.client.HTTPConnection("app.terraform.io/app/delta")
+    conn = http.client.HTTPConnection("https://app.terraform.io/api/v2/organizations")
     conn.request("GET", "/organisations")
     res = conn.getresponse()
-    log.debug(res)
 
     response = {
         "statusCode": res.status,
