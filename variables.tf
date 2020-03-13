@@ -5,5 +5,10 @@ variable "aws_region" {
 
 variable "runtime" {
   description = "Run Time for the code"
-  default = "python3.7"
+  default     = "python3.7"
+}
+
+variable "access_token" {
+  description = "Access Token for TF API"
+  default     = ""
 }

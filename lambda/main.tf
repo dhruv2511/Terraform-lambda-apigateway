@@ -6,4 +6,7 @@ resource "aws_lambda_function" "lambda" {
   handler          = var.handler
   filename         = var.filename
   source_code_hash = var.source_code
+  environment = {
+    variables = var.env_variables
+  }
 }

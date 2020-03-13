@@ -27,3 +27,8 @@ variable "filename" {
 variable "source_code" {
   description = "Source Code hash to be used for the lambda"
 }
+
+variable "env_variables" {
+  description = "Environmental variables for the lambda"
+  default     = {}
+}
