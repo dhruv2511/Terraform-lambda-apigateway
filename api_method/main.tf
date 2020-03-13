@@ -1,9 +1,10 @@
 # Example: request for GET /hello
 resource "aws_api_gateway_method" "request_method" {
-  rest_api_id   = var.rest_api_id
-  resource_id   = var.resource_id
-  http_method   = var.method
-  authorization = "NONE"
+  rest_api_id      = var.rest_api_id
+  resource_id      = var.resource_id
+  http_method      = var.method
+  authorization    = "NONE"
+  api_key_required = true
 }
 
 # Example: GET /hello => POST lambda

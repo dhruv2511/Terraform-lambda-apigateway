@@ -34,34 +34,56 @@ data "archive_file" "zipit" {
 resource "aws_lambda_function" "monitoring_lambda" {
   function_name    = "monitoring_lambda"
   handler          = "hello_lambda.handler"
-  role             = "${aws_iam_role.iam_role_for_lambda.arn}"
+  role             = aws_iam_role.iam_role_for_lambda.arn
   runtime          = "python3.7"
   source_code_hash = data.archive_file.zipit.output_base64sha256
   filename         = data.archive_file.zipit.output_path
 
 }
-//# Now, we need an API to expose those functions publicly
-//resource "aws_api_gateway_rest_api" "portal_api" {
-//  name = "Portal API"
-//}
-//
-//# The API requires at least one "endpoint", or "resource" in AWS terminology.
-//# The endpoint created here is: /hello
-//resource "aws_api_gateway_resource" "data_api_res" {
-//  rest_api_id = aws_api_gateway_rest_api.portal_api.id
-//  parent_id   = aws_api_gateway_rest_api.portal_api.root_resource_id
-//  path_part   = "data"
-//}
-//
-//resource "aws_api_gateway_resource" "monitoring_api_res" {
-//  parent_id   = aws_api_gateway_rest_api.portal_api.root_resource_id
-//  path_part   = "monitoring"
-//  rest_api_id = aws_api_gateway_rest_api.portal_api.id
-//}
-//
-//# Until now, the resource created could not respond to anything. We must set up
-//# a HTTP method (or verb) for that!
-//# This is the code for method GET /daata, that will talk to the first lambda
+
+resource "aws_lambda_function" "data_lambda" {
+  function_name    = "monitoring_get_lambda"
+  handler          = "hello_lambda.get_handler"
+  role             = aws_iam_role.iam_role_for_lambda.arn
+  runtime          = "python3.7"
+  source_code_hash = data.archive_file.zipit.output_base64sha256
+  filename         = data.archive_file.zipit.output_path
+
+}
+
+
+resource "aws_lambda_function" "data_lambda" {
+  function_name    = "monitoring_post_lambda"
+  handler          = "hello_lambda.post_handler"
+  role             = aws_iam_role.iam_role_for_lambda.arn
+  runtime          = "python3.7"
+  source_code_hash = data.archive_file.zipit.output_base64sha256
+  filename         = data.archive_file.zipit.output_path
+
+}
+
+# Now, we need an API to expose those functions publicly
+resource "aws_api_gateway_rest_api" "portal_api" {
+  name = "Portal API"
+}
+
+# The API requires at least one "endpoint", or "resource" in AWS terminology.
+# The endpoint created here is: /hello
+resource "aws_api_gateway_resource" "data_api_res" {
+  rest_api_id = aws_api_gateway_rest_api.portal_api.id
+  parent_id   = aws_api_gateway_rest_api.portal_api.root_resource_id
+  path_part   = "data"
+}
+
+resource "aws_api_gateway_resource" "monitoring_api_res" {
+  parent_id   = aws_api_gateway_rest_api.portal_api.root_resource_id
+  path_part   = "monitoring"
+  rest_api_id = aws_api_gateway_rest_api.portal_api.id
+}
+
+# Until now, the resource created could not respond to anything. We must set up
+# a HTTP method (or verb) for that!
+# This is the code for method GET /daata, that will talk to the first lambda
 //module "data_get" {
 //  source      = "./api_method"
 //  rest_api_id = aws_api_gateway_rest_api.portal_api.id
@@ -84,38 +106,57 @@ resource "aws_lambda_function" "monitoring_lambda" {
 //  region      = var.aws_region
 //  account_id  = data.aws_caller_identity.current.account_id
 //}
-//
-//
-//# Until now, the resource created could not respond to anything. We must set up
-//# a HTTP method (or verb) for that!
-//# This is the code for method GET /monitoring, that will talk to the first lambda
-//module "monitoring_get" {
-//  source      = "./api_method"
-//  rest_api_id = aws_api_gateway_rest_api.portal_api.id
-//  resource_id = aws_api_gateway_resource.monitoring_api_res.id
-//  method      = "GET"
-//  path        = aws_api_gateway_resource.monitoring_api_res.path
-//  lambda      = ""
-//  region      = var.aws_region
-//  account_id  = data.aws_caller_identity.current.account_id
-//}
-//
-//# This is the code for method POST /data, that will talk to the second lambda
-//module "monitoring_post" {
-//  source      = "./api_method"
-//  rest_api_id = aws_api_gateway_rest_api.portal_api.id
-//  resource_id = aws_api_gateway_resource.monitoring_api_res.id
-//  method      = "POST"
-//  path        = aws_api_gateway_resource.monitoring_api_res.path
-//  lambda      = ""
-//  region      = var.aws_region
-//  account_id  = data.aws_caller_identity.current.account_id
-//}
-//
-//# We can deploy the API now! (i.e. make it publicly available)
-//resource "aws_api_gateway_deployment" "hello_api_deployment" {
-//  rest_api_id = aws_api_gateway_rest_api.portal_api.id
-//  stage_name  = "production"
-//  description = "Deploy methods: ${module.data_get.http_method} ${module.data_post.http_method} ${module.monitoring_get.http_method} ${module.monitoring_post.http_method}"
-//}
+
+
+# Until now, the resource created could not respond to anything. We must set up
+# a HTTP method (or verb) for that!
+# This is the code for method GET /monitoring, that will talk to the first lambda
+module "monitoring_get" {
+  source      = "./api_method"
+  rest_api_id = aws_api_gateway_rest_api.portal_api.id
+  resource_id = aws_api_gateway_resource.monitoring_api_res.id
+  method      = "GET"
+  path        = aws_api_gateway_resource.monitoring_api_res.path
+  lambda      = ""
+  region      = var.aws_region
+  account_id  = data.aws_caller_identity.current.account_id
+}
+
+# This is the code for method POST /data, that will talk to the second lambda
+module "monitoring_post" {
+  source      = "./api_method"
+  rest_api_id = aws_api_gateway_rest_api.portal_api.id
+  resource_id = aws_api_gateway_resource.monitoring_api_res.id
+  method      = "POST"
+  path        = aws_api_gateway_resource.monitoring_api_res.path
+  lambda      = ""
+  region      = var.aws_region
+  account_id  = data.aws_caller_identity.current.account_id
+}
+
+# We can deploy the API now! (i.e. make it publicly available)
+resource "aws_api_gateway_deployment" "hello_api_deployment" {
+  rest_api_id = aws_api_gateway_rest_api.portal_api.id
+  stage_name  = "production"
+  description = "Deploy methods: ${module.data_get.http_method} ${module.data_post.http_method} ${module.monitoring_get.http_method} ${module.monitoring_post.http_method}"
+}
+
+resource "aws_api_gateway_usage_plan" "hello_api_plan" {
+  name = "my_usage_plan"
+
+  api_stages {
+    api_id = aws_api_gateway_rest_api.hello_api.id
+    stage  = aws_api_gateway_deployment.hello_api_deployment.stage_name
+  }
+}
+
+resource "aws_api_gateway_api_key" "hello_api_key" {
+  name = "portal_key"
+}
+
+resource "aws_api_gateway_usage_plan_key" "hello_api_plan_key" {
+  key_id        = aws_api_gateway_api_key.hello_api_key.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.hello_api_plan.id
+}
 
