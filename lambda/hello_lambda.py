@@ -6,4 +6,6 @@ org = client.get("organization", id="delta")
 
 response = org.create("workspace", name="test_api_workspace")
 
-print(response)
+
+def handler():
+    return (response)
