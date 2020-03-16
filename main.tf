@@ -166,18 +166,25 @@ resource "aws_api_gateway_rest_api" "portal_api" {
 # The API requires at least one "endpoint", or "resource" in AWS terminology.
 # The endpoint created here is: /hello
 
-resource "aws_api_gateway_resource" "monitoring_api_res" {
+resource "aws_api_gateway_resource" "status_tfe_api_rest" {
   parent_id   = aws_api_gateway_rest_api.portal_api.root_resource_id
-  path_part   = "status"
+  path_part   = "terraform"
+  rest_api_id = aws_api_gateway_rest_api.portal_api.id
+}
+
+
+resource "aws_api_gateway_resource" "status_dynamodb_api_rest" {
+  parent_id   = aws_api_gateway_rest_api.portal_api.root_resource_id
+  path_part   = "dynamodb"
   rest_api_id = aws_api_gateway_rest_api.portal_api.id
 }
 
 module "status_tfe" {
   source      = "./api_method"
   rest_api_id = aws_api_gateway_rest_api.portal_api.id
-  resource_id = aws_api_gateway_resource.monitoring_api_res.id
+  resource_id = aws_api_gateway_resource.status_tfe_api_rest.id
   method      = "GET"
-  path        = aws_api_gateway_resource.monitoring_api_res.path
+  path        = aws_api_gateway_resource.status_tfe_api_rest.path
   lambda      = aws_lambda_function.status_tfe_lambda.id
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
@@ -187,9 +194,9 @@ module "status_tfe" {
 module "status_dynamoDB" {
   source      = "./api_method"
   rest_api_id = aws_api_gateway_rest_api.portal_api.id
-  resource_id = aws_api_gateway_resource.monitoring_api_res.id
+  resource_id = aws_api_gateway_resource.status_dynamodb_api_rest.id
   method      = "GET"
-  path        = aws_api_gateway_resource.monitoring_api_res.path
+  path        = aws_api_gateway_resource.status_dynamodb_api_rest.path
   lambda      = aws_lambda_function.status_dynamodb_lambda.id
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
