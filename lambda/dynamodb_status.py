@@ -33,10 +33,22 @@ def handler(event, context):
         response = dynamodb_client.describe_table(TableName=table_name)
         return gen_api_response(response_body=response)
 
-    except dynamodb_client.exceptions.ResourceNotFoundException as ex:
-        log.info(ex)
-        data = {"ErrorMsg": ex}
+    except ApiError as ex:
+        log.info(f"ErrorMsg: {ex.data}")
+        data = {"ErrorMsg": ex.data}
         return gen_api_response(response_body=data, status_code=404)
 
     except Exception:
         return gen_api_response(response_body={}, status_code=500)
+
+
+class ApiError(Exception):
+    """
+    Custom exception to hold management api exceptions
+    """
+
+    def __init__(self, data):
+        self.data = data
+
+    def __str__(self):
+        return repr(self.data)
