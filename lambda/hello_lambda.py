@@ -5,7 +5,7 @@ import http.client
 
 
 headers = {
-    'Authorization': f'Bearer ${os.environ["access_token"]}',
+    'Authorization': f'Bearer {os.environ["access_token"]}',
     'Content-Type': 'application/vnd.api+json',
 }
 
