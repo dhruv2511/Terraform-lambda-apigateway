@@ -67,6 +67,69 @@ resource "aws_lambda_function" "monitoring_post_lambda" {
   }
 }
 
+###############################################################################
+# Logging and Monitoring the API
+###############################################################################
+resource "aws_api_gateway_account" "portal" {
+  cloudwatch_role_arn = aws_iam_role.cloudwatch.arn
+}
+
+resource "aws_iam_role" "cloudwatch" {
+  name = "api_gateway_cloudwatch_global"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "apigateway.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "cloudwatch" {
+  name = "default"
+  role = aws_iam_role.cloudwatch.id
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:DescribeLogGroups",
+                "logs:DescribeLogStreams",
+                "logs:PutLogEvents",
+                "logs:GetLogEvents",
+                "logs:FilterLogEvents"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_api_gateway_method_settings" "get_method_settings" {
+  rest_api_id = aws_api_gateway_rest_api.portal_api.id
+  stage_name  = aws_api_gateway_deployment.hello_api_deployment.stage_name
+  method_path = "${aws_api_gateway_resource.monitoring_api_res.path_part}/${module.monitoring_get.http_method}"
+
+  settings {
+    metrics_enabled = true
+    logging_level   = "INFO"
+  }
+}
 # Now, we need an API to expose those functions publicly
 resource "aws_api_gateway_rest_api" "portal_api" {
   name = "Portal API"
