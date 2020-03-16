@@ -13,12 +13,10 @@ dynamodb_client = boto3.client('dynamodb')
 table_name = os.environ['dynamodb_table']
 
 def gen_api_response(
-        response_body, status_code=200, headers=None, is_base64_encoded=False):
+        response_body, status_code=200):
     response = {
         "statusCode": status_code,
-        "headers": headers,
         "body": json.dumps(response_body),
-        "isBase64Encoded": is_base64_encoded,
     }
     log.info(f"Lambda Response: {response}")
     return response
@@ -44,5 +42,5 @@ def handler(event, context):
         return gen_api_response(response_body=data, status_code=status_code)
 
     except Exception:
-        return gen_api_response(response_body={}, status_code=500)
+        return gen_api_response(response_body={"Internal Server Error"}, status_code=500)
 
