@@ -168,17 +168,17 @@ resource "aws_api_gateway_rest_api" "portal_api" {
 
 resource "aws_api_gateway_resource" "monitoring_api_res" {
   parent_id   = aws_api_gateway_rest_api.portal_api.root_resource_id
-  path_part   = "monitoring"
+  path_part   = "status"
   rest_api_id = aws_api_gateway_rest_api.portal_api.id
 }
 
-module "monitoring_get" {
+module "status_tfe" {
   source      = "./api_method"
   rest_api_id = aws_api_gateway_rest_api.portal_api.id
   resource_id = aws_api_gateway_resource.monitoring_api_res.id
   method      = "GET"
   path        = aws_api_gateway_resource.monitoring_api_res.path
-  lambda      = aws_lambda_function.monitoring_get_lambda.id
+  lambda      = aws_lambda_function.status_tfe_lambda.id
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
 }
@@ -188,9 +188,9 @@ module "monitoring_post" {
   source      = "./api_method"
   rest_api_id = aws_api_gateway_rest_api.portal_api.id
   resource_id = aws_api_gateway_resource.monitoring_api_res.id
-  method      = "POST"
+  method      = "GET"
   path        = aws_api_gateway_resource.monitoring_api_res.path
-  lambda      = aws_lambda_function.monitoring_post_lambda.id
+  lambda      = aws_lambda_function.status_dynamodb_lambda.id
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
 }
