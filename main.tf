@@ -90,7 +90,7 @@ resource "aws_lambda_function" "status_dynamodb_lambda" {
   filename         = data.archive_file.zipit.output_path
   environment {
     variables = {
-      access_token = var.access_token
+      dynamodb_table = var.dynamodb_table
     }
   }
 }

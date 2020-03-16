@@ -12,3 +12,8 @@ variable "access_token" {
   description = "Access Token for TF API"
   default     = ""
 }
+
+variable "dynamodb_table" {
+  description = "DynamoDb Table Name that creates the database"
+  default     = "test"
+}
