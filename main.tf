@@ -58,7 +58,7 @@ resource "aws_iam_policy" "lambda_logging" {
         "dynamodb:ListTables"
       ],
       "Resource": "arn:aws:dynamodb:*:*:*"
-    },
+    }
   ]
 }
 EOF
