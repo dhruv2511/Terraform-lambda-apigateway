@@ -184,7 +184,7 @@ module "status_tfe" {
 }
 
 # This is the code for method POST /data, that will talk to the second lambda
-module "monitoring_post" {
+module "status_dynamoDB" {
   source      = "./api_method"
   rest_api_id = aws_api_gateway_rest_api.portal_api.id
   resource_id = aws_api_gateway_resource.monitoring_api_res.id
@@ -199,7 +199,7 @@ module "monitoring_post" {
 resource "aws_api_gateway_deployment" "hello_api_deployment" {
   rest_api_id = aws_api_gateway_rest_api.portal_api.id
   stage_name  = "production"
-  description = "Deploy methods: ${module.monitoring_get.http_method} ${module.monitoring_post.http_method}"
+  description = "Deploy methods: ${module.status_tfe.http_method} ${module.status_dynamoDB.http_method}"
 }
 
 resource "aws_api_gateway_usage_plan" "hello_api_plan" {
