@@ -67,7 +67,7 @@ data "archive_file" "zipit" {
 
 resource "aws_lambda_function" "monitoring_get_lambda" {
   function_name    = "monitoring_get_lambda"
-  handler          = "hello_lambda.get_handler"
+  handler          = "tfe_status.tfe_status_handler"
   role             = aws_iam_role.iam_role_for_lambda.arn
   runtime          = "python3.7"
   source_code_hash = data.archive_file.zipit.output_base64sha256
