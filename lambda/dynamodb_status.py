@@ -31,7 +31,7 @@ def dynamodb_status_handler(event, context):
     log.info(event)
 
     try:
-        response = dynamodb_client.describe_table(table_name)
+        response = dynamodb_client.describe_table(TableName=table_name)
         return gen_api_response(response_body=response)
 
     except ClientError as e:
