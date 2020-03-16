@@ -151,7 +151,7 @@ EOF
 resource "aws_api_gateway_method_settings" "get_method_settings" {
   rest_api_id = aws_api_gateway_rest_api.portal_api.id
   stage_name  = aws_api_gateway_deployment.hello_api_deployment.stage_name
-  method_path = "${aws_api_gateway_resource.monitoring_api_res.path_part}/${module.monitoring_get.http_method}"
+  method_path = "${aws_api_gateway_resource.monitoring_api_res.path_part}/${module.status_tfe.http_method}"
 
   settings {
     metrics_enabled = true
