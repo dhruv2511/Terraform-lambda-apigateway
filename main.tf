@@ -47,7 +47,18 @@ resource "aws_iam_policy" "lambda_logging" {
       ],
       "Resource": "arn:aws:logs:*:*:*",
       "Effect": "Allow"
-    }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:ListTables"
+      ],
+      "Resource": "arn:aws:dynamodb:*:*:*"
+    },
   ]
 }
 EOF
