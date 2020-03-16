@@ -55,7 +55,8 @@ resource "aws_iam_policy" "lambda_logging" {
         "dynamodb:GetItem",
         "dynamodb:Query",
         "dynamodb:Scan",
-        "dynamodb:ListTables"
+        "dynamodb:ListTables",
+        "dynamodb:DescribeTable"
       ],
       "Resource": "arn:aws:dynamodb:*:*:*"
     }
