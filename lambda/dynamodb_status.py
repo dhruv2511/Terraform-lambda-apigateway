@@ -1,4 +1,5 @@
 import boto3
+from botocore.exceptions import ClientError
 import os
 import logging
 import json
@@ -23,32 +24,25 @@ def gen_api_response(
     return response
 
 
-def handler(event, context):
+def dynamodb_status_handler(event, context):
     """
     Top level lambda handler
     """
     log.info(event)
 
     try:
-        response = dynamodb_client.describe_table(TableName=table_name)
+        response = dynamodb_client.describe_table(table_name)
         return gen_api_response(response_body=response)
 
-    except ApiError as ex:
-        log.info(f"ErrorMsg: {ex.data}")
-        data = {"ErrorMsg": ex.data}
-        return gen_api_response(response_body=data, status_code=404)
+    except ClientError as e:
+        if e.response['Error']['Code'] == "ResourceNotFoundException":
+            status_code = 404
+        else:
+            status_code = 500
+
+        data = {"ErrorMsg": "Table Not Found"}
+        return gen_api_response(response_body=data, status_code=status_code)
 
     except Exception:
         return gen_api_response(response_body={}, status_code=500)
 
-
-class ApiError(Exception):
-    """
-    Custom exception to hold management api exceptions
-    """
-
-    def __init__(self, data):
-        self.data = data
-
-    def __str__(self):
-        return repr(self.data)
