@@ -35,13 +35,8 @@ def handler(event, context):
 
     except dynamodb_client.exceptions.ResourceNotFoundException as ex:
         log.info(ex)
-        if ex.data == "" or ex.data == "":
-            status_code = 400
-        else:
-            status_code = 500
-
-        data = {"ErrorMsg": ex.data}
-        return gen_api_response(response_body=data, status_code=status_code)
+        data = {"ErrorMsg": ex}
+        return gen_api_response(response_body=data, status_code=404)
 
     except Exception:
         return gen_api_response(response_body={}, status_code=500)
