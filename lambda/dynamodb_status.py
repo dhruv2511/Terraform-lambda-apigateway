@@ -33,7 +33,7 @@ def handler(event, context):
         response = dynamodb_client.describe_table(table_name)
         return gen_api_response(response_body=response)
 
-    except dynamodb_client.exceptions.ResourceInUseException as ex:
+    except dynamodb_client.exceptions.ResourceNotFound as ex:
         log.info(ex)
         if ex.data == "" or ex.data == "":
             status_code = 400
