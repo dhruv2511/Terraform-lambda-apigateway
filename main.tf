@@ -65,7 +65,7 @@ data "archive_file" "zipit" {
   output_path = "${path.module}/lambda/monitoring_lambda.zip"
 }
 
-resource "aws_lambda_function" "monitoring_get_lambda" {
+resource "aws_lambda_function" "status_tfe_lambda" {
   function_name    = "monitoring_get_lambda"
   handler          = "tfe_status.tfe_status_handler"
   role             = aws_iam_role.iam_role_for_lambda.arn
@@ -81,9 +81,9 @@ resource "aws_lambda_function" "monitoring_get_lambda" {
 }
 
 
-resource "aws_lambda_function" "monitoring_post_lambda" {
+resource "aws_lambda_function" "status_dynamodb_lambda" {
   function_name    = "monitoring_post_lambda"
-  handler          = "hello_lambda.post_handler"
+  handler          = "dynamodb_status.handler"
   role             = aws_iam_role.iam_role_for_lambda.arn
   runtime          = "python3.7"
   source_code_hash = data.archive_file.zipit.output_base64sha256

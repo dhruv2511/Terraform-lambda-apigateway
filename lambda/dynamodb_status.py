@@ -23,7 +23,7 @@ def gen_api_response(
     return response
 
 
-def dynamodb_status_handler(event, context):
+def handler(event, context):
     """
     Top level lambda handler
     """
