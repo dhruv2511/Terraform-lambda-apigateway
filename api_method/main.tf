@@ -20,13 +20,13 @@ resource "aws_api_gateway_integration" "request_method_integration" {
 
   request_templates = {
     "application/xml" = <<EOF
-{
-   "path" : $input.json('$')
-}
-EOF
+  {
+    "path" : $input.json('$')
+  }
+  EOF
   }
 }
-}
+
 
 # lambda => GET response
 resource "aws_api_gateway_method_response" "response_method" {
