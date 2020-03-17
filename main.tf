@@ -246,7 +246,7 @@ module "post_dynamoDB" {
   resource_id = aws_api_gateway_resource.status_dynamodb_api_rest.id
   method      = "POST"
   path        = aws_api_gateway_resource.status_dynamodb_api_rest.path
-  lambda      = aws_lambda_function.status_dynamodb_lambda.id
+  lambda      = aws_lambda_function.post_dynamodb_lambda.id
   region      = var.aws_region
   account_id  = data.aws_caller_identity.current.account_id
 }
