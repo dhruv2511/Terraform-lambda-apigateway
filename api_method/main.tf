@@ -18,9 +18,14 @@ resource "aws_api_gateway_integration" "request_method_integration" {
   # AWS lambdas can only be invoked with the POST method
   integration_http_method = "POST"
 
-  request_parameters = {
-    "integration.request.header.X-Authorization" = "'static'"
+  request_templates = {
+    "application/xml" = <<EOF
+{
+   "path" : $input.json('$')
+}
+EOF
   }
+}
 }
 
 # lambda => GET response
