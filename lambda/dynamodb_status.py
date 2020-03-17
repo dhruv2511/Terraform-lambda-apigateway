@@ -30,7 +30,7 @@ def handler(event, context):
 
     try:
         response = dynamodb_client.describe_table(TableName=table_name)
-        return gen_api_response(response_body=response)
+        return gen_api_response(response_body={"Table Status": response['Table']['TableStatus']})
 
     except ClientError as e:
         if e.response['Error']['Code'] == "ResourceNotFoundException":
