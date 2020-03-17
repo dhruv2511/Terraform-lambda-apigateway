@@ -12,13 +12,48 @@ root_logger.setLevel(LOG_LEVEL)
 log = logging.getLogger(__name__)
 table_name = os.environ['dynamodb_table']
 ddb_client = boto3.client('dynamodb')
-
+regex = '[^@]+@[^@]+\.[^@]+'
 
 def get_json_body(event):
     print("JSON Body")
     body_json = event["body"]
     print(body_json)
     return body_json
+
+
+def process_validation(input_data):
+    type_dict = {
+        'accountEmail': str,
+        'accountPrefix': str,
+        'accountType': str,
+        'appName': str,
+        "cloudProvider": str,
+        "costCenter": str,
+        "createdAt": str,
+        "envType": str,
+        "id": str,
+        "lob": str,
+        "primaryRegion": str,
+        "primaryVpcCidr": str,
+        "reqId": str,
+        "responsible": str,
+        "secondaryVpcCidr": str,
+        "securityContact": str,
+        "servicenowCase": str
+
+    }
+    for k, v in input_data.items():
+        if not isinstance(v, type_dict[k]):
+            raise ApiError("Invalid Data")
+        if k == "accountEmail" or k == "id" or k == "reqId":
+            validate_email(v)
+
+
+def validate_email(email):
+    if re.match(regex, email):
+        pass
+    else:
+        raise ApiError("Invalid Email")
 
 
 def build_dynamodb_input(event_body):
@@ -58,9 +93,10 @@ def insert_to_table(
 
 
 def post_handler(event, context):
-    print("POST")
-
+    log.info("POST")
+    log.info(event)
     json_body = get_json_body(event)
+    process_validation(json_body)
 
     build_ddb_input = build_dynamodb_input(json_body)
 
@@ -73,3 +109,15 @@ def post_handler(event, context):
     }
 
     return response
+
+
+class ApiError(Exception):
+    """
+    Custom exception to hold management api exceptions
+    """
+
+    def __init__(self, data):
+        self.data = data
+
+    def __str__(self):
+        return repr(self.data)
