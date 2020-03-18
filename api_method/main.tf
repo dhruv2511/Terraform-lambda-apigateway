@@ -19,7 +19,7 @@ resource "aws_api_gateway_integration" "request_method_integration" {
   integration_http_method = "POST"
 
   request_templates = {
-    "application/xml" = <<EOF
+    "application/json" = <<EOF
   {
     "path" : $input.json('$')
   }
