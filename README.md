@@ -46,17 +46,21 @@ def handler(event, context):
     except ClientError as e:
         if e.response['Error']['Code'] == "ResourceNotFoundException":
             status_code = 404
+            data = {"ErrorMsg": "Resource Not Found"}
+        if e.response['Error']['Code'] == "AccessDeniedException":
+            status_code = 403
+            data = {"ErrorMsg": "Access Denied"}
         else:
             status_code = 500
+            data = {"ErrorMsg": "Internal Server Error"}
 
-        data = {"ErrorMsg": "Table Not Found"}
         return gen_api_response(response_body=data, status_code=status_code)
 
     except Exception:
         return gen_api_response(response_body={"Internal Server Error"}, status_code=500)
 ```
 
-The [Terraform configuration](main.tf) relies on modules:
+The [Terraform configuration](main.tf) relies on module:
 [`api_method`](api_method/). See the [Terraform Modules
 section](#terraform-modules) for further information. This configuration creates
 two lambda functions on AWS Lambda, a (deployed) REST API with a single endpoint
@@ -66,40 +70,7 @@ dashboard:
 
 ![](doc/accounts.png)
 
-
-## Getting started
-
-You must have an [AWS account](http://aws.amazon.com/). Next, you must [install
-Terraform](https://www.terraform.io/intro/getting-started/install.html) first.
-
-Clone this repository, then run:
-
-    $ make get
-
-Create a `terraform.tfvars` file with the content below. This step is optional
-as Terraform will ask you to fill in the different values, but it is convenient.
-
-```ini
-aws_region     = "eu-west-1"
-```
-
-You are now ready to use Terraform!
-
-    $ make plan
-
-If everything is OK, you can build the whole infrastructure:
-
-    $ make apply
-
-You can destroy all the components by running:
-
-    $ make destroy
-
-For more information, please read [the Terraform
-documentation](https://www.terraform.io/docs/index.html).
-
-
-## Terraform Modules
+## Terraform Modules & Resources
 
 ### `lambda`
 
